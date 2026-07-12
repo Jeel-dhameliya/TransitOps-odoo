@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { vehicleApi } from '../../services/vehicleApi';
 import Button from '../../components/Button';
-import SearchBar from '../../components/SearchBar';
 import StatusBadge from '../../components/StatusBadge';
 import Loader from '../../components/Loader';
 import Modal from '../../components/Modal';
@@ -12,6 +11,12 @@ const Vehicle = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Filters
+  const [filterType, setFilterType] = useState('All');
+  const [filterStatus, setFilterStatus] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+
   const [formData, setFormData] = useState({
     registrationNumber: '',
     name: '',
@@ -68,32 +73,63 @@ const Vehicle = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this vehicle?')) {
-      try {
-        await vehicleApi.delete(id);
-        fetchVehicles();
-      } catch (error) {
-        console.error('Failed to delete vehicle', error);
-        alert('Failed to delete vehicle');
-      }
-    }
-  };
+  // Filtered Data
+  const filteredVehicles = vehicles.filter(v => {
+    const matchType = filterType === 'All' || v.type === filterType;
+    const matchStatus = filterStatus === 'All' || v.status === filterStatus;
+    const matchSearch = v.registrationNumber.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        v.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchType && matchStatus && matchSearch;
+  });
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl font-bold text-slate-900">Vehicles</h1>
-        <Button className="flex items-center gap-2" onClick={() => setIsModalOpen(true)}>
-          <Plus size={16} /> Add Vehicle
-        </Button>
-      </div>
       
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
-        <div className="mb-4 max-w-md">
-          <SearchBar placeholder="Search vehicles by registration or make..." />
+      {/* Top Bar with Filters and Add Button */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-wrap gap-4 items-center w-full md:w-auto">
+          <select 
+            value={filterType} 
+            onChange={(e) => setFilterType(e.target.value)}
+            className="p-2 border border-slate-300 rounded text-sm min-w-[150px]"
+          >
+            <option value="All">Type: All</option>
+            <option value="Truck">Truck</option>
+            <option value="Van">Van</option>
+            <option value="Trailer">Trailer</option>
+          </select>
+          
+          <select 
+            value={filterStatus} 
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="p-2 border border-slate-300 rounded text-sm min-w-[150px]"
+          >
+            <option value="All">Status: All</option>
+            <option value="Available">Available</option>
+            <option value="On Trip">On Trip</option>
+            <option value="In Shop">In Shop</option>
+            <option value="Retired">Retired</option>
+          </select>
+
+          <input 
+            type="text" 
+            placeholder="Search reg. no..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="p-2 border border-slate-300 rounded text-sm min-w-[200px] flex-1"
+          />
         </div>
         
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded whitespace-nowrap"
+        >
+          + Add Vehicle
+        </button>
+      </div>
+      
+      {/* Table Container */}
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
         {loading ? (
           <div className="py-12"><Loader /></div>
         ) : (
@@ -101,29 +137,43 @@ const Vehicle = () => {
             <table className="min-w-full divide-y divide-slate-200">
               <thead className="bg-slate-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Registration</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Name / Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Capacity</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">REG. NO. (UNIQUE)</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">NAME/MODEL</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">TYPE</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">CAPACITY</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">ODOMETER</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">ACQ. COST</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">STATUS</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-slate-200">
-                {vehicles.map((v) => (
-                  <tr key={v._id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900">{v.registrationNumber}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{v.name} <span className="text-xs text-slate-400">({v.type})</span></td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{v.maxLoadCapacity} kg</td>
-                    <td className="px-6 py-4 whitespace-nowrap"><StatusBadge status={v.status} /></td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button onClick={() => handleDelete(v._id)} className="text-red-600 hover:text-red-900 ml-4">Delete</button>
-                    </td>
-                  </tr>
-                ))}
-                {vehicles.length === 0 && (
+              <tbody className="bg-white divide-y divide-slate-100">
+                {filteredVehicles.map((v) => {
+                  let statusBg = 'bg-slate-500';
+                  if (v.status === 'Available') statusBg = 'bg-green-600';
+                  else if (v.status === 'On Trip') statusBg = 'bg-blue-600';
+                  else if (v.status === 'In Shop') statusBg = 'bg-amber-500';
+                  else if (v.status === 'Retired') statusBg = 'bg-red-500';
+
+                  return (
+                    <tr key={v._id} className="hover:bg-slate-50 transition-colors text-sm">
+                      <td className="px-4 py-3 whitespace-nowrap font-bold text-slate-900">{v.registrationNumber}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-slate-700">{v.name}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-slate-700">{v.type}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-slate-700">{v.maxLoadCapacity} kg</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-slate-700">{v.odometer?.toLocaleString() || 0}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-slate-700">{v.acquisitionCost?.toLocaleString() || 0}</td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`px-3 py-1 inline-flex text-[11px] leading-5 font-semibold rounded-md text-white ${statusBg}`}>
+                          {v.status}
+                        </span>
+                      </td>
+                    </tr>
+                  )
+                })}
+                {filteredVehicles.length === 0 && (
                   <tr>
-                    <td colSpan="5" className="px-6 py-8 text-center text-slate-500 text-sm">
-                      No vehicles found. Click "Add Vehicle" to register one.
+                    <td colSpan="7" className="px-6 py-8 text-center text-slate-500 text-sm">
+                      No vehicles match the filter criteria.
                     </td>
                   </tr>
                 )}
@@ -131,6 +181,11 @@ const Vehicle = () => {
             </table>
           </div>
         )}
+      </div>
+
+      {/* Rules text below table */}
+      <div className="text-xs font-semibold text-orange-600 italic">
+        Rule: Registration No. must be unique • Retired/In Shop vehicles are hidden from Trip Dispatcher
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Register New Vehicle">

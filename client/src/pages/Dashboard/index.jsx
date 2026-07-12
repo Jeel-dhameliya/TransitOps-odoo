@@ -1,95 +1,188 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Truck, Activity, Wrench, Map, Clock, Users, PieChart } from 'lucide-react';
+import api from '../../services/api';
+import { tripApi } from '../../services/tripApi';
+import { driverApi } from '../../services/driverApi';
+import SearchBar from '../../components/SearchBar';
+import Loader from '../../components/Loader';
 
-const StatCard = ({ title, value, icon: Icon, colorClass }) => (
-  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between hover:shadow-md transition-shadow">
-    <div>
-      <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">{title}</p>
-      <h3 className="text-3xl font-extrabold text-slate-800">{value}</h3>
-    </div>
-    <div className={`w-14 h-14 rounded-full flex items-center justify-center ${colorClass}`}>
-      <Icon className="w-7 h-7" />
-    </div>
+const StatCard = ({ title, value, colorClass }) => (
+  <div className={`bg-white p-4 rounded-md shadow-sm border border-slate-200 border-l-4 ${colorClass} flex flex-col justify-center min-h-[90px]`}>
+    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">{title}</p>
+    <h3 className="text-2xl font-extrabold text-slate-800">{value}</h3>
   </div>
 );
 
 const Dashboard = () => {
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Operations Dashboard</h1>
-          <p className="text-slate-500 font-medium">Real-time overview of your transit operations</p>
-        </div>
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState(null);
+  const [recentTrips, setRecentTrips] = useState([]);
+  const [driversOnDuty, setDriversOnDuty] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [reportRes, tripsRes, driversRes] = await Promise.all([
+          api.get('/reports/dashboard'),
+          tripApi.getAll(),
+          driverApi.getAll()
+        ]);
         
-        {/* Filters */}
-        <div className="flex gap-3 w-full sm:w-auto">
-          <select className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1">
-            <option value="all">All Vehicle Types</option>
-            <option value="van">Vans</option>
-            <option value="truck">Trucks</option>
-          </select>
-          <select className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1">
-            <option value="all">All Regions</option>
-            <option value="north">North</option>
-            <option value="south">South</option>
-          </select>
-        </div>
+        setStats(reportRes.data);
+        
+        // Get 5 most recent trips
+        const sortedTrips = tripsRes.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+        setRecentTrips(sortedTrips);
+        
+        const activeDrivers = driversRes.data.filter(d => d.status === 'On Duty' || d.status === 'On Trip').length;
+        setDriversOnDuty(activeDrivers);
+        
+      } catch (error) {
+        console.error('Failed to fetch dashboard data', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+
+  if (loading) return <div className="py-12"><Loader /></div>;
+
+  const vCounts = stats?.vehicleCounts || { Available: 0, 'On Trip': 0, 'In Shop': 0, Retired: 0 };
+  const activeVehicles = vCounts.Available + vCounts['On Trip'];
+
+  return (
+    <div className="space-y-8">
+      {/* Filters Row */}
+      <div className="flex flex-col sm:flex-row items-center gap-4 border-b border-slate-200 pb-4">
+        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">FILTERS</span>
+        <select className="p-2 border border-slate-300 rounded text-sm min-w-[150px]">
+          <option>Vehicle Type: All</option>
+        </select>
+        <select className="p-2 border border-slate-300 rounded text-sm min-w-[150px]">
+          <option>Status: All</option>
+        </select>
+        <select className="p-2 border border-slate-300 rounded text-sm min-w-[150px]">
+          <option>Region: All</option>
+        </select>
       </div>
 
-      {/* KPI Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
-          title="Fleet Utilization" 
-          value="82%" 
-          icon={PieChart} 
-          colorClass="bg-blue-100 text-blue-600" 
-        />
-        <StatCard 
-          title="Available Vehicles" 
-          value="12" 
-          icon={Truck} 
-          colorClass="bg-emerald-100 text-emerald-600" 
-        />
-        <StatCard 
-          title="Active Vehicles" 
-          value="45" 
-          icon={Activity} 
-          colorClass="bg-indigo-100 text-indigo-600" 
-        />
-        <StatCard 
-          title="In Maintenance" 
-          value="3" 
-          icon={Wrench} 
-          colorClass="bg-red-100 text-red-600" 
-        />
-        <StatCard 
-          title="Active Trips" 
-          value="28" 
-          icon={Map} 
-          colorClass="bg-purple-100 text-purple-600" 
-        />
-        <StatCard 
-          title="Pending Trips" 
-          value="7" 
-          icon={Clock} 
-          colorClass="bg-amber-100 text-amber-600" 
-        />
-        <StatCard 
-          title="Drivers On Duty" 
-          value="45" 
-          icon={Users} 
-          colorClass="bg-teal-100 text-teal-600" 
-        />
+      {/* KPI Row (Matches Wireframe Content) */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        <StatCard title="ACTIVE VEHICLES" value={activeVehicles} colorClass="border-blue-500" />
+        <StatCard title="AVAILABLE VEHICLES" value={vCounts.Available} colorClass="border-green-500" />
+        <StatCard title="VEHICLES IN MAINTENANCE" value={vCounts['In Shop']} colorClass="border-orange-500" />
+        <StatCard title="ACTIVE TRIPS" value={stats?.activeTrips || 0} colorClass="border-blue-500" />
+        <StatCard title="PENDING TRIPS" value={stats?.pendingTrips || 0} colorClass="border-blue-500" />
+        <StatCard title="DRIVERS ON DUTY" value={driversOnDuty} colorClass="border-blue-500" />
+        <StatCard title="FLEET UTILIZATION" value={stats?.fleetUtilization || '0%'} colorClass="border-green-500" />
       </div>
-      
-      {/* Visual Analytics Placeholder */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 min-h-[300px] flex items-center justify-center">
-        <div className="text-center">
-          <PieChart className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-slate-700">Analytics Charts</h3>
-          <p className="text-slate-500 text-sm max-w-md mx-auto">Visual charts and operational insights will be populated here when real data is integrated.</p>
+
+      {/* Two Column Layout Below */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Left Column: Recent Trips Table */}
+        <div className="lg:col-span-2">
+          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">RECENT TRIPS</h3>
+          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+            <table className="min-w-full divide-y divide-slate-200">
+              <thead className="bg-slate-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase">TRIP</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase">VEHICLE</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase">DRIVER</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase">STATUS</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase">ETA</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {recentTrips.length === 0 && (
+                  <tr>
+                    <td colSpan="5" className="px-4 py-8 text-center text-sm text-slate-500">No trips found.</td>
+                  </tr>
+                )}
+                {recentTrips.map((trip, idx) => {
+                  let statusBg = 'bg-slate-500';
+                  if (trip.status === 'On Trip' || trip.status === 'Dispatched') statusBg = 'bg-blue-600';
+                  if (trip.status === 'Completed') statusBg = 'bg-green-600';
+                  
+                  return (
+                    <tr key={trip._id} className="text-sm">
+                      <td className="px-4 py-3 font-semibold text-slate-700">TR00{idx + 1}</td>
+                      <td className="px-4 py-3 text-slate-600">{trip.vehicle?.registrationNumber || '-'}</td>
+                      <td className="px-4 py-3 text-slate-600">{trip.driver?.name || '-'}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold text-white ${statusBg}`}>
+                          {trip.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-slate-500">
+                        {trip.status === 'Draft' ? 'Awaiting vehicle' : 
+                         trip.status === 'Completed' ? '-' : 
+                         '~ 45 min'}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
+
+        {/* Right Column: Vehicle Status Bars */}
+        <div className="lg:col-span-1">
+          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">VEHICLE STATUS</h3>
+          
+          <div className="space-y-6 mt-6">
+            
+            {/* Available */}
+            <div>
+              <div className="flex justify-between text-sm font-medium mb-1">
+                <span>Available</span>
+                <span>{vCounts.Available}</span>
+              </div>
+              <div className="w-full bg-slate-100 h-4 rounded-full overflow-hidden">
+                <div className="bg-green-500 h-full" style={{ width: `${(vCounts.Available / Math.max(activeVehicles, 1)) * 100}%` }}></div>
+              </div>
+            </div>
+
+            {/* On Trip */}
+            <div>
+              <div className="flex justify-between text-sm font-medium mb-1">
+                <span>On Trip</span>
+                <span>{vCounts['On Trip']}</span>
+              </div>
+              <div className="w-full bg-slate-100 h-4 rounded-full overflow-hidden">
+                <div className="bg-blue-500 h-full" style={{ width: `${(vCounts['On Trip'] / Math.max(activeVehicles, 1)) * 100}%` }}></div>
+              </div>
+            </div>
+
+            {/* In Shop */}
+            <div>
+              <div className="flex justify-between text-sm font-medium mb-1">
+                <span>In Shop</span>
+                <span>{vCounts['In Shop']}</span>
+              </div>
+              <div className="w-full bg-slate-100 h-4 rounded-full overflow-hidden">
+                <div className="bg-orange-500 h-full" style={{ width: `${(vCounts['In Shop'] / Math.max(activeVehicles, 1)) * 100}%` }}></div>
+              </div>
+            </div>
+
+            {/* Retired */}
+            <div>
+              <div className="flex justify-between text-sm font-medium mb-1">
+                <span>Retired</span>
+                <span>{vCounts.Retired}</span>
+              </div>
+              <div className="w-full bg-slate-100 h-4 rounded-full overflow-hidden">
+                <div className="bg-red-500 h-full" style={{ width: '10%' }}></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </div>
   );
