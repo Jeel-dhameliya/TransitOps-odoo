@@ -7,10 +7,10 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "oxlint",
-    "preview": "vite preview",
+    "dev": "cd client && vite",
+    "build": "cd client && vite build",
+    "lint": "cd client && oxlint",
+    "preview": "cd client && vite preview",
     "server": "nodemon server/src/server.js",
     "start": "node server/src/server.js"
   },
@@ -24,6 +24,7 @@
     "axios": "^1.18.1",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",

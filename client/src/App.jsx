@@ -5,6 +5,7 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import AdminLayout from './layouts/AdminLayout';
 
 import Login from './pages/Login';
+import Register from './pages/Register';
 import Vehicle from './pages/Vehicle';
 import Driver from './pages/Driver';
 import Trip from './pages/Trip';
@@ -35,6 +36,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           
           <Route element={<ProtectedRoute />}>
             <Route element={<AdminLayout />}>

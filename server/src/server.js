@@ -1,16 +1,25 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
-const authRoutes = require('./routes/authRoutes'); // 1. Import routes
+const authRoutes = require('./routes/authRoutes');
 
 dotenv.config();
 connectDB();
 
 const app = express();
 
-app.use(express.json()); // Body parser must come first!
+app.use(cors({
+    origin: ["http://localhost:5173", "http://localhost:5174"],
+    credentials: true
+}));
 
-// 2. Mount the routes
+app.use(express.json({ limit: "20kb" }));
+app.use(express.urlencoded({ extended: true, limit: "20kb" }));
+app.use(cookieParser());
+
+// Mount the routes
 app.use('/api/auth', authRoutes);
 
 app.get('/', (req, res) => {
