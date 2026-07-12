@@ -1,5 +1,7 @@
-const User = require("../models/User")
+const User = require("../models/User");
 const jwt = require('jsonwebtoken');
+const AppError = require('../utils/AppError');
+const catchAsync = require('../utils/catchAsync');
 
 const generateToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET, {
@@ -7,97 +9,75 @@ const generateToken = (id, role) => {
   });
 };
 
-const loginUser = async (req, res) => {
+const loginUser = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
-  try {
-    // 1. Check if user exists
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    // 2. Check if password matches
-    const isMatch = await user.matchPassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    // 3. Return the token and user data
-    res.json({
-      _id: user._id,
-      email: user.email,
-      role: user.role,
-      token: generateToken(user._id, user.role),
-    });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server Error' });
+  // 1. Check if user exists (explicitly select password if it's disabled in model by default, though here it's fine)
+  const user = await User.findOne({ email }).select('+password');
+  
+  if (!user || !(await user.matchPassword(password))) {
+    return next(new AppError('Incorrect email or password', 401));
   }
-};
+
+  // 3. Return the token and user data
+  res.json({
+    _id: user._id,
+    email: user.email,
+    role: user.role,
+    token: generateToken(user._id, user.role),
+  });
+});
 
 
-const registerUser = async (req, res) => {
+const registerUser = catchAsync(async (req, res, next) => {
   const { email, password, role } = req.body;
 
-  try {
-    const userExists = await User.findOne({ email });
-    if (userExists) return res.status(400).json({ message: 'User already exists' });
-
-    const user = await User.create({ email, password, role });
-
-    res.status(201).json({
-      _id: user._id,
-      email: user.email,
-      role: user.role,
-      token: generateToken(user._id, user.role),
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server Error: ' + error.message });
+  const userExists = await User.findOne({ email });
+  if (userExists) {
+    return next(new AppError('User already exists', 400));
   }
-};
+
+  const user = await User.create({ email, password, role });
+
+  res.status(201).json({
+    _id: user._id,
+    email: user.email,
+    role: user.role,
+    token: generateToken(user._id, user.role),
+  });
+});
 
 // @desc    Get current logged in user details
 // @route   GET /api/auth/me
 // @access  Private
-const getMe = async (req, res) => {
-  try {
-    // req.user is already fetched and stripped of the password by your 'protect' middleware
-    res.json(req.user);
-  } catch (error) {
-    console.error('Get Me Error:', error);
-    res.status(500).json({ message: 'Server Error fetching user details.' });
-  }
-};
+const getMe = catchAsync(async (req, res, next) => {
+  // req.user is already fetched and stripped of the password by your 'protect' middleware
+  res.json(req.user);
+});
 
 // @desc    Update user password
 // @route   PUT /api/auth/update-password
 // @access  Private
-const updatePassword = async (req, res) => {
-  try {
-    const { currentPassword, newPassword } = req.body;
+const updatePassword = catchAsync(async (req, res, next) => {
+  const { currentPassword, newPassword } = req.body;
 
-    // We have to re-fetch the user because req.user doesn't have the password attached
-    const user = await User.findById(req.user._id);
+  // We have to re-fetch the user because req.user doesn't have the password attached
+  const user = await User.findById(req.user._id).select('+password');
 
-    // Verify current password
-    const isMatch = await user.matchPassword(currentPassword);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Incorrect current password.' });
-    }
-
-    // Set new password (your pre-save hook in User.js will automatically hash it!)
-    user.password = newPassword;
-    await user.save();
-
-    res.json({ message: 'Password updated successfully.' });
-  } catch (error) {
-    console.error('Update Password Error:', error);
-    res.status(500).json({ message: 'Server Error updating password.' });
+  // Verify current password
+  if (!(await user.matchPassword(currentPassword))) {
+    return next(new AppError('Incorrect current password.', 401));
   }
-};
 
-// Remember to update your exports at the bottom!
+  // Set new password (your pre-save hook in User.js will automatically hash it!)
+  user.password = newPassword;
+  await user.save();
+
+  // Send a new token so the user stays logged in
+  res.json({ 
+    message: 'Password updated successfully.',
+    token: generateToken(user._id, user.role)
+  });
+});
+
 module.exports = { loginUser, registerUser, getMe, updatePassword };

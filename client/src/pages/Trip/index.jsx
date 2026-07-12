@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { tripApi } from '../../services/tripApi';
 import { vehicleApi } from '../../services/vehicleApi';
 import { driverApi } from '../../services/driverApi';
@@ -69,10 +70,11 @@ const Trip = () => {
         cargoWeight: '',
         plannedDistance: ''
       });
+      toast.success('Trip created successfully!');
       fetchData(); // Refresh the list
     } catch (error) {
       console.error('Failed to create trip:', error);
-      alert(error.response?.data?.message || 'Failed to create trip');
+      toast.error(error.response?.data?.message || 'Failed to create trip');
     } finally {
       setIsSubmitting(false);
     }
@@ -82,17 +84,20 @@ const Trip = () => {
     try {
       if (action === 'dispatch') {
         await tripApi.dispatch(id);
+        toast.success('Trip dispatched! Assets are now On Trip.');
       } else if (action === 'complete') {
         const finalOdometer = prompt("Enter final odometer reading (optional):", "0");
         if (finalOdometer === null) return; // User cancelled
         await tripApi.complete(id, finalOdometer);
+        toast.success('Trip completed! Assets are now Available.');
       } else if (action === 'cancel') {
         await tripApi.cancel(id);
+        toast.info('Trip cancelled.');
       }
       fetchData();
     } catch (error) {
       console.error('Failed to update trip status', error);
-      alert(error.response?.data?.message || 'Failed to update trip status');
+      toast.error(error.response?.data?.message || 'Failed to update trip status');
     }
   };
 

@@ -1,16 +1,53 @@
-# React + Vite
+# TransitOps - Smart Transport Operations Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+TransitOps is a comprehensive fleet management and dispatching system built for the Odoo Hackathon. It streamlines the lifecycle of vehicles, drivers, trips, fuel logs, and maintenance into a unified, secure, and performant platform.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Vehicle & Driver Management:** Enforce unique licenses, registrations, and track safety scores and expirations.
+- **Smart Dispatching:** Strict state-machine workflow (`Draft` -> `Dispatched` -> `Completed`/`Cancelled`) preventing double-dispatching and ensuring valid cargo weights.
+- **Maintenance & Asset Locking:** Opening a maintenance ticket immediately locks a vehicle (`In Shop`), preventing dispatch until resolved.
+- **Financial Analytics & Fuel Tracking:** Tracks fuel efficiency (km/L) and calculates total operational cost, automatically simulating ROI.
+- **Export Capabilities:** One-click CSV exports of comprehensive financial data.
 
-## React Compiler
+## Architecture & Security
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+This project was built to production standards:
+- **Global Error Handling:** Consistent API error formatting with `AppError` and centralized middleware.
+- **Security Middleware:** Includes `helmet` for HTTP headers, `express-rate-limit` for DDoS protection, and `express-mongo-sanitize` for NoSQL injection prevention.
+- **Resilience:** React Error Boundaries prevent complete frontend crashes, and global Axios interceptors handle token expirations gracefully.
+- **Input Validation:** Strict Mongoose schemas with built-in validation rules and index structures.
 
-## Expanding the Oxlint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+- **Frontend:** React, React Router, TailwindCSS, Axios, Recharts, React Toastify.
+- **Backend:** Node.js, Express, MongoDB (Mongoose), JWT Auth.
+
+## Getting Started
+
+### Prerequisites
+- Node.js (v18+)
+- MongoDB connection string
+
+### Environment Variables
+Create `.env` in the `server` directory:
+```
+PORT=3046
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+NODE_ENV=development
+```
+
+### Installation
+1. Navigate to the root directory.
+2. Run `npm install` in both the root, `client`, and `server` folders (or rely on `npm i` if workspace configured).
+3. Start the application:
+   - Backend: `cd server && npm run server`
+   - Frontend: `cd client && npm run dev`
+
+## API Documentation
+
+- `POST /api/auth/login`: Authenticate and receive JWT.
+- `GET /api/vehicles`: Fetch registry.
+- `PUT /api/trips/:id/dispatch`: Dispatch trip and lock assets.
+- `GET /api/reports/financials/export`: Download CSV analytics.

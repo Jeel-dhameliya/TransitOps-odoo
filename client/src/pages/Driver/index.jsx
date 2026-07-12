@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { driverApi } from '../../services/driverApi';
 import Button from '../../components/Button';
 import SearchBar from '../../components/SearchBar';
@@ -52,10 +53,11 @@ const Driver = () => {
         licenseExpiryDate: '',
         contactNumber: ''
       });
+      toast.success('Driver registered successfully!');
       fetchDrivers();
     } catch (error) {
       console.error('Failed to register driver:', error);
-      alert(error.response?.data?.message || 'Failed to register driver');
+      toast.error(error.response?.data?.message || 'Failed to register driver');
     } finally {
       setIsSubmitting(false);
     }
@@ -65,10 +67,11 @@ const Driver = () => {
     if (window.confirm('Are you sure you want to remove this driver?')) {
       try {
         await driverApi.delete(id);
+        toast.success('Driver removed successfully!');
         fetchDrivers();
       } catch (error) {
         console.error('Failed to delete driver', error);
-        alert('Failed to delete driver');
+        toast.error('Failed to delete driver');
       }
     }
   };

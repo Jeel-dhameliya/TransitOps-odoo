@@ -13,9 +13,16 @@ import Trip from './pages/Trip';
 import Maintenance from './pages/Maintenance';
 import Fuel from './pages/Fuel';
 
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+import { ErrorBoundary } from 'react-error-boundary';
+import GlobalErrorFallback from './components/GlobalErrorFallback';
+
 function App() {
   return (
-    <AuthProvider>
+    <ErrorBoundary FallbackComponent={GlobalErrorFallback} onReset={() => window.location.replace('/')}>
+      <AuthProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -36,7 +43,9 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
     </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

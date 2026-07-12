@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { vehicleApi } from '../../services/vehicleApi';
 import Button from '../../components/Button';
 import StatusBadge from '../../components/StatusBadge';
@@ -64,10 +65,11 @@ const Vehicle = () => {
         odometer: '',
         acquisitionCost: ''
       });
+      toast.success('Vehicle registered successfully!');
       fetchVehicles();
     } catch (error) {
       console.error('Failed to create vehicle:', error);
-      alert(error.response?.data?.message || 'Failed to create vehicle');
+      toast.error(error.response?.data?.message || 'Failed to create vehicle');
     } finally {
       setIsSubmitting(false);
     }
