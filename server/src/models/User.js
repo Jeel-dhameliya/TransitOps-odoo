@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
     type: String, 
     enum: ['Fleet Manager', 'Driver', 'Safety Officer', 'Financial Analyst'],
     default: 'Driver' 
-  } //[cite: 1]
+  } 
 }, { timestamps: true });
 
 userSchema.pre('save' , async function(next){

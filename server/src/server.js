@@ -8,7 +8,7 @@ connectDB();
 
 const app = express();
 
-app.use(express.json()); // Body parser must come first!
+app.use(express.json()); 
 
 // 2. Mount the routes
 app.use('/api/auth', authRoutes);
