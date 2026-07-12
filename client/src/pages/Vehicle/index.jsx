@@ -53,9 +53,9 @@ const Vehicle = () => {
               </thead>
               <tbody className="bg-white divide-y divide-slate-200">
                 {vehicles.map((v) => (
-                  <tr key={v.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{v.registration}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{v.make} {v.model}</td>
+                  <tr key={v._id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{v.registrationNumber}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{v.name} ({v.type})</td>
                     <td className="px-6 py-4 whitespace-nowrap"><StatusBadge status={v.status} /></td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button className="text-blue-600 hover:text-blue-900">Edit</button>

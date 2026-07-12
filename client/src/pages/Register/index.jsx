@@ -7,7 +7,7 @@ import { X } from 'lucide-react';
 const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('Dispatcher');
+  const [role, setRole] = useState('Driver');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { login } = useContext(AuthContext);
@@ -123,7 +123,7 @@ const Register = () => {
                     onChange={(e) => setRole(e.target.value)}
                   >
                     <option value="Fleet Manager">Fleet Manager</option>
-                    <option value="Dispatcher">Dispatcher</option>
+                    <option value="Driver">Driver</option>
                     <option value="Safety Officer">Safety Officer</option>
                     <option value="Financial Analyst">Financial Analyst</option>
                   </select>

@@ -1,15 +1,16 @@
 import React, { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Truck, Users, Map, X } from 'lucide-react';
+import { Truck, Users, Map, X, LayoutDashboard } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const { user } = useContext(AuthContext);
   
   const allNavItems = [
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['Fleet Manager', 'Driver', 'Safety Officer', 'Financial Analyst'] },
     { name: 'Vehicles', path: '/vehicles', icon: Truck, roles: ['Fleet Manager'] },
     { name: 'Drivers', path: '/drivers', icon: Users, roles: ['Safety Officer'] },
-    { name: 'Trips', path: '/trips', icon: Map, roles: ['Dispatcher'] },
+    { name: 'Trips', path: '/trips', icon: Map, roles: ['Driver'] },
   ];
 
   // Filter items based on role. (In the future, add other roles' pages)
@@ -33,9 +34,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       >
         <div className="flex items-center justify-between h-16 px-6 bg-[#0f151c] border-b border-slate-800">
           <span className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-            <div className="w-8 h-8 border border-amber-500 rounded flex items-center justify-center text-amber-500 bg-amber-500/10">
-               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 8h16"/><path d="M4 12h16"/><path d="M4 16h16"/><path d="M8 4v16"/><path d="M12 4v16"/><path d="M16 4v16"/></svg>
-            </div>
+            <img src="/favicon.svg" alt="TransitOps Logo" className="w-8 h-8" />
             <span>Transit<span className="text-slate-300 font-normal">Ops</span></span>
           </span>
           <button onClick={toggleSidebar} className="md:hidden text-slate-400 hover:text-white">
