@@ -167,8 +167,22 @@ const cancelTrip = async (req, res) => {
   }
 };
 
+// @desc    Get all trips
+// @route   GET /api/trips
+// @access  Private
+const getAllTrips = async (req, res) => {
+  try {
+    const trips = await Trip.find().populate('vehicle').populate('driver');
+    res.json(trips);
+  } catch (error) {
+    console.error('Get Trips Error:', error);
+    res.status(500).json({ message: 'Server Error fetching trips.' });
+  }
+};
+
 module.exports = {
   createTrip,
+  getAllTrips,
   dispatchTrip,
   completeTrip,
   cancelTrip
