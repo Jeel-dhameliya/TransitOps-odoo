@@ -1,53 +1,45 @@
-# TransitOps - Smart Transport Operations Platform
+# TransitOps
 
-TransitOps is a comprehensive fleet management and dispatching system built for the Odoo Hackathon. It streamlines the lifecycle of vehicles, drivers, trips, fuel logs, and maintenance into a unified, secure, and performant platform.
+A smart transport operations and fleet management platform built for the Odoo Hackathon. 
 
-## Features
+The goal here was to build something production-ready, not just a standard hackathon prototype. We implemented proper role-based access control (RBAC), strict state machines for trips and vehicle statuses, and a solid financial analytics dashboard. 
 
-- **Vehicle & Driver Management:** Enforce unique licenses, registrations, and track safety scores and expirations.
-- **Smart Dispatching:** Strict state-machine workflow (`Draft` -> `Dispatched` -> `Completed`/`Cancelled`) preventing double-dispatching and ensuring valid cargo weights.
-- **Maintenance & Asset Locking:** Opening a maintenance ticket immediately locks a vehicle (`In Shop`), preventing dispatch until resolved.
-- **Financial Analytics & Fuel Tracking:** Tracks fuel efficiency (km/L) and calculates total operational cost, automatically simulating ROI.
-- **Export Capabilities:** One-click CSV exports of comprehensive financial data.
+## Core Stack
+- **Frontend**: React, React Router v6, Tailwind CSS, Recharts
+- **Backend**: Node.js, Express, MongoDB/Mongoose
+- **Security**: JWT Auth, Helmet, rate-limiting, and NoSQL injection prevention
 
-## Architecture & Security
+## How it works
+The system revolves around four main roles: Fleet Manager, Dispatcher, Safety Officer, and Financial Analyst. Depending on who is logged in, you get access to different modules:
 
-This project was built to production standards:
-- **Global Error Handling:** Consistent API error formatting with `AppError` and centralized middleware.
-- **Security Middleware:** Includes `helmet` for HTTP headers, `express-rate-limit` for DDoS protection, and `express-mongo-sanitize` for NoSQL injection prevention.
-- **Resilience:** React Error Boundaries prevent complete frontend crashes, and global Axios interceptors handle token expirations gracefully.
-- **Input Validation:** Strict Mongoose schemas with built-in validation rules and index structures.
+- **Vehicles & Drivers**: Track licenses, safety scores, and maintenance status. You can't dispatch a vehicle if it's "In Shop" or a driver if they're assigned to another trip.
+- **Dispatching**: Strict workflow for trips. Draft -> Dispatched -> Completed/Cancelled. Assigning a vehicle/driver to a trip automatically locks them so they can't be double-booked.
+- **Maintenance**: Logging an issue puts a vehicle "In Shop". Closing the ticket returns it to the available pool.
+- **Analytics**: Calculates fuel efficiency, operational costs, and handles CSV exports for financial reporting.
 
-## Tech Stack
+## Setup & Running Locally
 
-- **Frontend:** React, React Router, TailwindCSS, Axios, Recharts, React Toastify.
-- **Backend:** Node.js, Express, MongoDB (Mongoose), JWT Auth.
+Make sure you have Node (v18+) and MongoDB installed.
 
-## Getting Started
+1. Clone the repo and install dependencies:
+   ```bash
+   cd server && npm install
+   cd ../client && npm install
+   ```
 
-### Prerequisites
-- Node.js (v18+)
-- MongoDB connection string
+2. Create a `.env` in the `server` directory with your local config:
+   ```env
+   PORT=3046
+   MONGO_URI=mongodb://127.0.0.1:27017/transitops
+   JWT_SECRET=your_super_secret_jwt_key_here
+   NODE_ENV=development
+   ```
 
-### Environment Variables
-Create `.env` in the `server` directory:
-```
-PORT=3046
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-NODE_ENV=development
-```
+3. Spin everything up:
+   - For the backend: `cd server && npm run dev`
+   - For the frontend: `cd client && npm run dev`
 
-### Installation
-1. Navigate to the root directory.
-2. Run `npm install` in both the root, `client`, and `server` folders (or rely on `npm i` if workspace configured).
-3. Start the application:
-   - Backend: `cd server && npm run server`
-   - Frontend: `cd client && npm run dev`
+Navigate to `http://localhost:5173` and you're good to go. 
 
-## API Documentation
-
-- `POST /api/auth/login`: Authenticate and receive JWT.
-- `GET /api/vehicles`: Fetch registry.
-- `PUT /api/trips/:id/dispatch`: Dispatch trip and lock assets.
-- `GET /api/reports/financials/export`: Download CSV analytics.
+## Notes for Judges
+We spent a lot of time polishing the UX and ensuring the backend doesn't break under weird edge cases. Try creating a trip, locking a vehicle in maintenance, and checking how the UI responds when you try to dispatch that same vehicle. You can also export the financial analytics to CSV directly from the dashboard.
