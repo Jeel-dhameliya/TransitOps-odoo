@@ -48,6 +48,5 @@ const vehicleSchema = new mongoose.Schema({
 
 // Index for frequent queries
 vehicleSchema.index({ status: 1 });
-vehicleSchema.index({ registrationNumber: 1 });
 
 module.exports = mongoose.model('Vehicle', vehicleSchema);

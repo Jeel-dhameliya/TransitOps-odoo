@@ -89,7 +89,7 @@ if (process.env.NODE_ENV !== 'test') {
 
   // Handle unhandled promise rejections
   process.on('unhandledRejection', err => {
-    console.error('UNHANDLED REJECTION! 💥 Shutting down...');
+    console.error('UNHANDLED REJECTION!  Shutting down...');
     console.error(err.name, err.message);
     server.close(() => {
       process.exit(1);

@@ -49,6 +49,5 @@ driverSchema.methods.isLicenseExpired = function() {
 };
 
 driverSchema.index({ status: 1 });
-driverSchema.index({ licenseNumber: 1 });
 
 module.exports = mongoose.model("Driver", driverSchema);
