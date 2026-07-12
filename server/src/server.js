@@ -5,8 +5,14 @@ const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const vehicleRoutes = require('./routes/vehicleRoutes');
+<<<<<<< HEAD
 const driverRoutes = require('./routes/driverRoutes');
 dotenv.config();
+=======
+const driverRoutes = require('./routes/driverRoutes')
+const tripRoutes = require('./routes/tripRoutes');
+dotenv.config('../.env');
+>>>>>>> origin/harshal
 connectDB();
 
 const app = express();
@@ -24,6 +30,8 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/vehicles', vehicleRoutes);
+app.use('/api/trips',tripRoutes);
+
 
 app.get('/', (req, res) => {
   res.send('TransitOps API is running...');
