@@ -80,13 +80,15 @@ const Trip = () => {
 
   const handleStatusChange = async (id, action) => {
     try {
-      if (action === 'dispatch') await tripApi.updateStatus(id, 'dispatch');
-      if (action === 'complete') {
+      if (action === 'dispatch') {
+        await tripApi.dispatch(id);
+      } else if (action === 'complete') {
         const finalOdometer = prompt("Enter final odometer reading (optional):", "0");
         if (finalOdometer === null) return; // User cancelled
-        await tripApi.updateStatus(id, 'complete'); // In real app, we'd pass finalOdometer in body
+        await tripApi.complete(id, finalOdometer);
+      } else if (action === 'cancel') {
+        await tripApi.cancel(id);
       }
-      if (action === 'cancel') await tripApi.updateStatus(id, 'cancel');
       fetchData();
     } catch (error) {
       console.error('Failed to update trip status', error);
