@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Truck, Activity, Wrench, Map, Clock, Users, PieChart, Download } from 'lucide-react';
-import api from '../../services/api';
 import { tripApi } from '../../services/tripApi';
 import { driverApi } from '../../services/driverApi';
 import { reportApi } from '../../services/reportApi';
-import SearchBar from '../../components/SearchBar';
 import Loader from '../../components/Loader';
 
 const StatCard = ({ title, value, colorClass, iconBgClass, icon: Icon }) => (
