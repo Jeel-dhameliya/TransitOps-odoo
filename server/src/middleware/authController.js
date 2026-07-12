@@ -37,4 +37,26 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { loginUser };
+
+const registerUser = async (req, res) => {
+  const { email, password, role } = req.body;
+
+  try {
+    const userExists = await User.findOne({ email });
+    if (userExists) return res.status(400).json({ message: 'User already exists' });
+
+    const user = await User.create({ email, password, role });
+
+    res.status(201).json({
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id, user.role),
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// Update your export!
+module.exports = { loginUser, registerUser };
