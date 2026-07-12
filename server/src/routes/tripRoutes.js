@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router(); 
 const {protect } = require('../middleware/auth');
-const {authorizeroles} = require('../middleware/role');
+const {authorizeRoles} = require('../middleware/role');
 const{
     createTrip,
   dispatchTrip,
@@ -13,9 +13,9 @@ const{
 router.use(protect); 
 
 
-router.post('/',authorizeroles('Driver', 'Fleet Manager'),createTrip);
+router.post('/',authorizeRoles('Driver', 'Fleet Manager'),createTrip);
 
-router.put('/:id/dispatch' , authorizeroles('Driver', 'Fleet Manager'), dispatchTrip);
+router.put('/:id/dispatch' , authorizeRoles('Driver', 'Fleet Manager'), dispatchTrip);
 
 router.put('/:id/complete', authorizeRoles('Driver', 'Fleet Manager'), completeTrip);
 
