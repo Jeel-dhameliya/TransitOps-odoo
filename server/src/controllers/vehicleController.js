@@ -39,21 +39,35 @@ const createVehicle = async (req, res) => {
 // @access  Private (Authenticated Users)
 const getAllVehicles = async (req, res) => {
   try {
-    const { type, status } = req.query;
+    const { type, status, search, sort } = req.query;
     let query = {};
 
-    // Support dashboard / registry filters dynamically[cite: 1]
+    // 1. Basic Filters
     if (type) query.type = type;
     if (status) query.status = status;
 
-    const vehicles = await Vehicle.find(query);
+    // 2. Search by Registration Number or Name[cite: 1]
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } }, // 'i' makes it case-insensitive
+        { registrationNumber: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // 3. Sorting (e.g., sort=-acquisitionCost to get most expensive first)[cite: 1]
+    let sortQuery = { createdAt: -1 }; // Default: newest first
+    if (sort) {
+      const sortFields = sort.split(',').join(' ');
+      sortQuery = sortFields;
+    }
+
+    const vehicles = await Vehicle.find(query).sort(sortQuery);
     res.json(vehicles);
   } catch (error) {
     console.error('Get Vehicles Error:', error);
     res.status(500).json({ message: 'Server Error fetching vehicle registry.' });
   }
 };
-
 // @desc    Get a single vehicle by ID
 // @route   GET /api/vehicles/:id
 // @access  Private (Authenticated Users)
