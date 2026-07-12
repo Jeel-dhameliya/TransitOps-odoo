@@ -5,14 +5,9 @@ const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const vehicleRoutes = require('./routes/vehicleRoutes');
-<<<<<<< HEAD
 const driverRoutes = require('./routes/driverRoutes');
-dotenv.config();
-=======
-const driverRoutes = require('./routes/driverRoutes')
 const tripRoutes = require('./routes/tripRoutes');
-dotenv.config('../.env');
->>>>>>> origin/harshal
+dotenv.config();
 connectDB();
 
 const app = express();

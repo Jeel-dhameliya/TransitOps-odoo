@@ -8,9 +8,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   
   const allNavItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['Fleet Manager', 'Driver', 'Safety Officer', 'Financial Analyst'] },
-    { name: 'Vehicles', path: '/vehicles', icon: Truck, roles: ['Fleet Manager'] },
-    { name: 'Drivers', path: '/drivers', icon: Users, roles: ['Safety Officer'] },
-    { name: 'Trips', path: '/trips', icon: Map, roles: ['Driver'] },
+    { name: 'Vehicles', path: '/vehicles', icon: Truck, roles: ['Fleet Manager', 'Driver', 'Safety Officer'] },
+    { name: 'Drivers', path: '/drivers', icon: Users, roles: ['Fleet Manager', 'Driver', 'Safety Officer'] },
+    { name: 'Trips', path: '/trips', icon: Map, roles: ['Fleet Manager', 'Driver'] },
   ];
 
   // Filter items based on role. (In the future, add other roles' pages)
