@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 
-const vechicleSchema = new mogoose.Schema({
+const vehicleSchema = new mongoose.Schema({
     registrationNumber: { type: String, required: true, unique: true }, //[cite: 1]
   name: { type: String, required: true },
   type: { type: String, required: true },

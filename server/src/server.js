@@ -4,7 +4,8 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes'); // 1. Import routes
 const vehicleRoutes = require('./routes/vehicleRoutes');
 const driverRoutes = require('./routes/driverRoutes')
-dotenv.config();
+const tripRoutes = require('./routes/tripRoutes');
+dotenv.config('../.env');
 connectDB();
 
 const app = express();
@@ -15,6 +16,8 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/vehicles', vehicleRoutes);
+app.use('/api/trips',tripRoutes);
+
 
 app.get('/', (req, res) => {
   res.send('TransitOps API is running...');
