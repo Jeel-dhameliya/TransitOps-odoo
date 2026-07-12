@@ -22,7 +22,7 @@ const Login = () => {
       login(response.data.user, response.data.token);
       navigate('/');
     } catch (err) {
-      setError(err?.response?.data?.message || 'Invalid credentials.');
+      setError(err?.response?.data?.message || err.message || 'Invalid credentials.');
     } finally {
       setLoading(false);
     }
@@ -41,15 +41,27 @@ const Login = () => {
           <p className="text-slate-400 text-lg">Smart Transport Operations Platform</p>
           
           <div className="mt-24">
-            <h3 className="text-sm font-semibold mb-6 text-slate-400 uppercase tracking-wider">One login, four roles:</h3>
-            <ul className="space-y-4">
-              {['Fleet Manager', 'Dispatcher', 'Safety Officer', 'Financial Analyst'].map(r => (
-                <li key={r} className="flex items-center gap-4 text-lg font-medium text-slate-200">
-                  <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"></path></svg>
-                  {r}
-                </li>
-              ))}
-            </ul>
+            <div className="grid gap-8">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-blue-500/20 rounded-xl">
+                  <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white mb-1">Real-time Operations</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">Monitor your entire fleet, track active trips, and manage dispatching with zero latency.</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-purple-500/20 rounded-xl">
+                  <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white mb-1">Advanced Analytics</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">Make data-driven decisions with comprehensive financial reporting and performance metrics.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         
@@ -144,7 +156,7 @@ const Login = () => {
                 </div>
 
                 <div className="text-sm">
-                  <a href="#" className="font-bold text-blue-600 hover:text-blue-500 transition-colors">
+                  <a href="/forgot-password" className="font-bold text-blue-600 hover:text-blue-500 transition-colors">
                     Forgot password?
                   </a>
                 </div>

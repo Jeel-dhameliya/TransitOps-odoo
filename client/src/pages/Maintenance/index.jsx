@@ -10,9 +10,11 @@ import { Wrench } from 'lucide-react';
 
 const Maintenance = () => {
   const [logs, setLogs] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [ticketToClose, setTicketToClose] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     vehicle: '',
@@ -68,18 +70,24 @@ const Maintenance = () => {
     }
   };
 
-  const handleClose = async (id) => {
-    if (window.confirm('Are you sure you want to close this maintenance ticket? The vehicle will be restored to Available.')) {
-      try {
-        await maintenanceApi.close(id);
-        toast.success('Maintenance closed! Vehicle is now Available.');
-        fetchData();
-      } catch (error) {
-        console.error('Failed to close maintenance:', error);
-        toast.error('Failed to close maintenance');
-      }
+  const confirmClose = async () => {
+    if (!ticketToClose) return;
+    try {
+      await maintenanceApi.close(ticketToClose);
+      toast.success('Maintenance closed! Vehicle is now Available.');
+      setTicketToClose(null);
+      fetchData();
+    } catch (error) {
+      console.error('Failed to close maintenance:', error);
+      toast.error('Failed to close maintenance');
     }
   };
+
+  const filteredLogs = logs.filter(log => 
+    (log.vehicle?.registrationNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (log.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (log.status || '').toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
@@ -92,7 +100,11 @@ const Maintenance = () => {
       
       <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
         <div className="mb-4 max-w-md">
-          <SearchBar placeholder="Search maintenance logs..." />
+          <SearchBar 
+            placeholder="Search maintenance logs..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
         
         {loading ? (
@@ -111,7 +123,7 @@ const Maintenance = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-slate-200">
-                {logs.map((log) => (
+                {filteredLogs.map((log) => (
                   <tr key={log._id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                       {new Date(log.createdAt).toLocaleDateString()}
@@ -134,15 +146,15 @@ const Maintenance = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       {log.status === 'Open' && (
-                        <button onClick={() => handleClose(log._id)} className="text-blue-600 hover:text-blue-900">Close Ticket</button>
+                        <button onClick={() => setTicketToClose(log._id)} className="text-blue-600 hover:text-blue-900">Close Ticket</button>
                       )}
                     </td>
                   </tr>
                 ))}
-                {logs.length === 0 && (
+                {filteredLogs.length === 0 && (
                   <tr>
                     <td colSpan="6" className="px-6 py-8 text-center text-slate-500 text-sm">
-                      No maintenance records found.
+                      {searchTerm ? 'No maintenance records match your search.' : 'No maintenance records found.'}
                     </td>
                   </tr>
                 )}
@@ -178,6 +190,20 @@ const Maintenance = () => {
             <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Logging...' : 'Log Maintenance'}</Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal isOpen={!!ticketToClose} onClose={() => setTicketToClose(null)} title="Close Maintenance Ticket">
+        <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+          Are you sure you want to close this maintenance ticket? The associated vehicle will be restored to <strong>Available</strong> status and will be ready for new trips.
+        </p>
+        <div className="flex justify-end gap-3 pt-2">
+          <button onClick={() => setTicketToClose(null)} className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">
+            Cancel
+          </button>
+          <Button onClick={confirmClose}>
+            Confirm Close
+          </Button>
+        </div>
       </Modal>
     </div>
   );

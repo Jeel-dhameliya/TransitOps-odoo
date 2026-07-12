@@ -10,6 +10,7 @@ import { Fuel as FuelIcon } from 'lucide-react';
 
 const Fuel = () => {
   const [logs, setLogs] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -65,6 +66,11 @@ const Fuel = () => {
     }
   };
 
+  const filteredLogs = logs.filter(log => 
+    (log.vehicle?.registrationNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (log.vehicle?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -76,7 +82,11 @@ const Fuel = () => {
       
       <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
         <div className="mb-4 max-w-md">
-          <SearchBar placeholder="Search logs..." />
+          <SearchBar 
+            placeholder="Search logs..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
         
         {loading ? (
@@ -93,7 +103,7 @@ const Fuel = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-slate-200">
-                {logs.map((log) => (
+                {filteredLogs.map((log) => (
                   <tr key={log._id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                       {new Date(log.date).toLocaleDateString()}
@@ -109,10 +119,10 @@ const Fuel = () => {
                     </td>
                   </tr>
                 ))}
-                {logs.length === 0 && (
+                {filteredLogs.length === 0 && (
                   <tr>
                     <td colSpan="4" className="px-6 py-8 text-center text-slate-500 text-sm">
-                      No fuel records found.
+                      {searchTerm ? 'No fuel records match your search.' : 'No fuel records found.'}
                     </td>
                   </tr>
                 )}

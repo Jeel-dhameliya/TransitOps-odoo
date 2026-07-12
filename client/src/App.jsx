@@ -6,6 +6,7 @@ import AdminLayout from './layouts/AdminLayout';
 
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import Vehicle from './pages/Vehicle';
 import Driver from './pages/Driver';
@@ -27,6 +28,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           
           <Route element={<ProtectedRoute />}>
             <Route element={<AdminLayout />}>

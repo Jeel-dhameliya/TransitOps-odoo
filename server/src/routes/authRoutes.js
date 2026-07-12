@@ -20,7 +20,7 @@ const loginValidation = [
 const registerValidation = [
   check('email', 'Please include a valid email').isEmail().normalizeEmail(),
   check('password', 'Please enter a password with 6 or more characters').isLength({ min: 6 }),
-  check('role', 'Role must be Fleet Manager, Driver, or Financial Analyst').optional().isIn(['Fleet Manager', 'Driver', 'Financial Analyst'])
+  check('role', 'Role must be Fleet Manager, Driver, Safety Officer, or Financial Analyst').optional().isIn(['Fleet Manager', 'Driver', 'Safety Officer', 'Financial Analyst'])
 ];
 
 const passwordValidation = [

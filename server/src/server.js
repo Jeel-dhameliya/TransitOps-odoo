@@ -25,9 +25,9 @@ app.use(helmet());
 
 // Limit requests from same API
 const limiter = rateLimit({
-  max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+  max: 1000, // Increased limit for hackathon/dev
   windowMs: 15 * 60 * 1000,
-  message: 'Too many requests from this IP, please try again in 15 minutes!'
+  message: { message: 'Too many requests from this IP, please try again in 15 minutes!' }
 });
 app.use('/api', limiter);
 

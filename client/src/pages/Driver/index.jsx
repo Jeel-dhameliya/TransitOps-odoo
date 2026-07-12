@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { toast } from 'react-toastify';
 import { driverApi } from '../../services/driverApi';
+import { AuthContext } from '../../context/AuthContext';
 import Button from '../../components/Button';
 import SearchBar from '../../components/SearchBar';
 import StatusBadge from '../../components/StatusBadge';
@@ -10,8 +11,11 @@ import { Plus } from 'lucide-react';
 
 const Driver = () => {
   const [drivers, setDrivers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [driverToRemove, setDriverToRemove] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -63,18 +67,23 @@ const Driver = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to remove this driver?')) {
-      try {
-        await driverApi.delete(id);
-        toast.success('Driver removed successfully!');
-        fetchDrivers();
-      } catch (error) {
-        console.error('Failed to delete driver', error);
-        toast.error('Failed to delete driver');
-      }
+  const confirmDelete = async () => {
+    if (!driverToRemove) return;
+    try {
+      await driverApi.delete(driverToRemove);
+      toast.success('Driver removed successfully!');
+      setDriverToRemove(null);
+      fetchDrivers();
+    } catch (error) {
+      console.error('Failed to delete driver', error);
+      toast.error('Failed to delete driver');
     }
   };
+
+  const filteredDrivers = drivers.filter(d => 
+    (d.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (d.licenseNumber || '').toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
@@ -87,7 +96,11 @@ const Driver = () => {
       
       <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
         <div className="mb-4 max-w-md">
-          <SearchBar placeholder="Search drivers by name or license..." />
+          <SearchBar 
+            placeholder="Search drivers by name or license..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
         
         {loading ? (
@@ -106,7 +119,7 @@ const Driver = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-slate-200">
-                {drivers.map((d) => (
+                {filteredDrivers.map((d) => (
                   <tr key={d._id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900">{d.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
@@ -120,14 +133,16 @@ const Driver = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap"><StatusBadge status={d.status} /></td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button onClick={() => handleDelete(d._id)} className="text-red-600 hover:text-red-900 ml-4">Remove</button>
+                      {user?.role === 'Fleet Manager' && (
+                        <button onClick={() => setDriverToRemove(d._id)} className="text-red-600 hover:text-red-900 ml-4">Remove</button>
+                      )}
                     </td>
                   </tr>
                 ))}
-                {drivers.length === 0 && (
+                {filteredDrivers.length === 0 && (
                   <tr>
                     <td colSpan="6" className="px-6 py-8 text-center text-slate-500 text-sm">
-                      No drivers registered. Click "Register Driver" to add one.
+                      {searchTerm ? 'No drivers match your search.' : 'No drivers registered. Click "Register Driver" to add one.'}
                     </td>
                   </tr>
                 )}
@@ -171,6 +186,20 @@ const Driver = () => {
             <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Registering...' : 'Register Driver'}</Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal isOpen={!!driverToRemove} onClose={() => setDriverToRemove(null)} title="Remove Driver">
+        <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+          Are you sure you want to remove this driver? This action cannot be undone.
+        </p>
+        <div className="flex justify-end gap-3 pt-2">
+          <button onClick={() => setDriverToRemove(null)} className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">
+            Cancel
+          </button>
+          <Button onClick={confirmDelete} className="bg-red-600 hover:bg-red-700 shadow-md shadow-red-500/20 text-white">
+            Confirm Remove
+          </Button>
+        </div>
       </Modal>
     </div>
   );

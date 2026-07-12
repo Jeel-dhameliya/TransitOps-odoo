@@ -12,6 +12,7 @@ import { Plus } from 'lucide-react';
 
 const Trip = () => {
   const [trips, setTrips] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [vehicles, setVehicles] = useState([]);
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -101,6 +102,13 @@ const Trip = () => {
     }
   };
 
+  const filteredTrips = trips.filter(t => 
+    (t.source || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (t.destination || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (t.vehicle?.registrationNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (t.driver?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -112,7 +120,11 @@ const Trip = () => {
       
       <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
         <div className="mb-4 max-w-md">
-          <SearchBar placeholder="Search trips by destination..." />
+          <SearchBar 
+            placeholder="Search trips by destination, source, vehicle, or driver..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
         
         {loading ? (
@@ -131,7 +143,7 @@ const Trip = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-slate-200">
-                {trips.map((t) => (
+                {filteredTrips.map((t) => (
                   <tr key={t._id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900">
                       {t.source} <span className="text-slate-400 mx-1">→</span> {t.destination}
@@ -161,10 +173,10 @@ const Trip = () => {
                     </td>
                   </tr>
                 ))}
-                {trips.length === 0 && (
+                {filteredTrips.length === 0 && (
                   <tr>
                     <td colSpan="6" className="px-6 py-8 text-center text-slate-500 text-sm">
-                      No trips found. Click "Create Trip" to start dispatching.
+                      {searchTerm ? 'No trips match your search.' : 'No trips found. Click "Create Trip" to start dispatching.'}
                     </td>
                   </tr>
                 )}
