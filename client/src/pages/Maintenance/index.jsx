@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { maintenanceApi } from '../../services/maintenanceApi';
 import { vehicleApi } from '../../services/vehicleApi';
 import Button from '../../components/Button';
@@ -57,10 +58,11 @@ const Maintenance = () => {
         description: '',
         cost: ''
       });
+      toast.success('Maintenance logged successfully! Vehicle is now In Shop.');
       fetchData();
     } catch (error) {
       console.error('Failed to log maintenance:', error);
-      alert(error.response?.data?.message || 'Failed to log maintenance');
+      toast.error(error.response?.data?.message || 'Failed to log maintenance');
     } finally {
       setIsSubmitting(false);
     }
@@ -70,10 +72,11 @@ const Maintenance = () => {
     if (window.confirm('Are you sure you want to close this maintenance ticket? The vehicle will be restored to Available.')) {
       try {
         await maintenanceApi.close(id);
+        toast.success('Maintenance closed! Vehicle is now Available.');
         fetchData();
       } catch (error) {
         console.error('Failed to close maintenance:', error);
-        alert('Failed to close maintenance');
+        toast.error('Failed to close maintenance');
       }
     }
   };

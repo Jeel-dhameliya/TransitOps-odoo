@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { fuelApi } from '../../services/fuelApi';
 import { vehicleApi } from '../../services/vehicleApi';
 import Button from '../../components/Button';
@@ -53,16 +54,12 @@ const Fuel = () => {
         cost: Number(formData.cost)
       });
       setIsModalOpen(false);
-      setFormData({
-        vehicle: '',
-        liters: '',
-        cost: '',
-        date: ''
-      });
+      setFormData({ vehicle: '', liters: '', cost: '', date: '' });
+      toast.success('Fuel log recorded successfully!');
       fetchData();
     } catch (error) {
       console.error('Failed to log fuel:', error);
-      alert(error.response?.data?.message || 'Failed to log fuel');
+      toast.error(error.response?.data?.message || 'Failed to log fuel');
     } finally {
       setIsSubmitting(false);
     }

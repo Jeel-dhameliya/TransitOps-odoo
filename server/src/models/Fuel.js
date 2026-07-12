@@ -4,22 +4,25 @@ const fuelSchema = new mongoose.Schema({
   vehicle: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Vehicle',
-    required: true
+    required: [true, 'Vehicle is required']
   },
   liters: {
     type: Number,
-    required: true,
-    min: 1
+    required: [true, 'Liters is required'],
+    min: [0.1, 'Liters must be greater than 0']
   },
   cost: {
     type: Number,
-    required: true,
-    min: 0
+    required: [true, 'Cost is required'],
+    min: [0, 'Cost cannot be negative']
   },
   date: {
     type: Date,
     default: Date.now
   }
 }, { timestamps: true });
+
+fuelSchema.index({ vehicle: 1 });
+fuelSchema.index({ date: -1 });
 
 module.exports = mongoose.model('Fuel', fuelSchema);
