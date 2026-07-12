@@ -5,7 +5,7 @@ const authRoutes = require('./routes/authRoutes'); // 1. Import routes
 const vehicleRoutes = require('./routes/vehicleRoutes');
 const driverRoutes = require('./routes/driverRoutes')
 const tripRoutes = require('./routes/tripRoutes');
-dotenv.config('../.env');
+dotenv.config({ path: "../../.env" });
 connectDB();
 
 const app = express();
