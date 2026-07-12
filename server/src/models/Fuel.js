@@ -1,22 +1,24 @@
 const mongoose = require('mongoose');
 
 const fuelSchema = new mongoose.Schema({
-  vehicle: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Vehicle', 
-    required: true 
+  vehicle: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Vehicle',
+    required: true
   },
-  liters: { 
-    type: Number, 
-    required: true 
+  liters: {
+    type: Number,
+    required: true,
+    min: 1
   },
-  cost: { 
-    type: Number, 
-    required: true 
+  cost: {
+    type: Number,
+    required: true,
+    min: 0
   },
-  dateLogged: { 
-    type: Date, 
-    default: Date.now 
+  date: {
+    type: Date,
+    default: Date.now
   }
 }, { timestamps: true });
 

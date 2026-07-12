@@ -31,4 +31,17 @@ const createFuelLog = async (req, res) => {
   }
 };
 
-module.exports = { createFuelLog };
+// @desc    Get all fuel logs
+// @route   GET /api/fuel
+// @access  Private
+const getAllFuelLogs = async (req, res) => {
+  try {
+    const logs = await Fuel.find().populate('vehicle');
+    res.json(logs);
+  } catch (error) {
+    console.error('Get Fuel Logs Error:', error);
+    res.status(500).json({ message: 'Server Error fetching fuel logs.' });
+  }
+};
+
+module.exports = { getAllFuelLogs, createFuelLog };

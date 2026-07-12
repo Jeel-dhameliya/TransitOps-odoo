@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router(); 
-const {protect } = require('../middleware/auth');
-const {authorizeRoles} = require('../middleware/role');
-const{
-    createTrip,
+const { protect } = require('../middleware/auth');
+const { authorizeRoles } = require('../middleware/role');
+const {
+  createTrip,
+  getAllTrips,
   dispatchTrip,
   completeTrip,
   cancelTrip
@@ -12,10 +13,10 @@ const{
 
 router.use(protect); 
 
+router.get('/', getAllTrips);
+router.post('/', authorizeRoles('Driver', 'Fleet Manager'), createTrip);
 
-router.post('/',authorizeRoles('Driver', 'Fleet Manager'),createTrip);
-
-router.put('/:id/dispatch' , authorizeRoles('Driver', 'Fleet Manager'), dispatchTrip);
+router.put('/:id/dispatch', authorizeRoles('Driver', 'Fleet Manager'), dispatchTrip);
 
 router.put('/:id/complete', authorizeRoles('Driver', 'Fleet Manager'), completeTrip);
 
