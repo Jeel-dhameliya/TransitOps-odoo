@@ -1,12 +1,20 @@
 const express = require('express');
-const { loginUser, registerUser } = require('../controllers/authController');
+const { 
+  loginUser, 
+  registerUser, 
+  getMe, 
+  updatePassword 
+} = require('../controllers/authController');
+const { protect } = require('../middleware/auth'); // Import your security middleware
 
 const router = express.Router();
 
-// POST /api/auth/login
+// Public Routes
 router.post('/login', loginUser);
+router.post('/register', registerUser); // (Keep this for hackathon testing)
 
-// POST /api/auth/register (Temporary route to create your test users)
-router.post('/register', registerUser);
+// Protected Routes (Require a valid JWT token)
+router.get('/me', protect, getMe);
+router.put('/update-password', protect, updatePassword);
 
 module.exports = router;

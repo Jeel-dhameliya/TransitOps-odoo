@@ -59,5 +59,45 @@ const registerUser = async (req, res) => {
   }
 };
 
-// Update your export!
-module.exports = { loginUser, registerUser };
+// @desc    Get current logged in user details
+// @route   GET /api/auth/me
+// @access  Private
+const getMe = async (req, res) => {
+  try {
+    // req.user is already fetched and stripped of the password by your 'protect' middleware
+    res.json(req.user);
+  } catch (error) {
+    console.error('Get Me Error:', error);
+    res.status(500).json({ message: 'Server Error fetching user details.' });
+  }
+};
+
+// @desc    Update user password
+// @route   PUT /api/auth/update-password
+// @access  Private
+const updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    // We have to re-fetch the user because req.user doesn't have the password attached
+    const user = await User.findById(req.user._id);
+
+    // Verify current password
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Incorrect current password.' });
+    }
+
+    // Set new password (your pre-save hook in User.js will automatically hash it!)
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: 'Password updated successfully.' });
+  } catch (error) {
+    console.error('Update Password Error:', error);
+    res.status(500).json({ message: 'Server Error updating password.' });
+  }
+};
+
+// Remember to update your exports at the bottom!
+module.exports = { loginUser, registerUser, getMe, updatePassword };
