@@ -19,6 +19,8 @@ app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/trips',tripRoutes);
 app.use('/api/maintenance', require('./routes/maintenanceRoutes'));
 app.use('/api/fuel', require('./routes/fuelRoutes'));
+app.use('/api/reports', require('./routes/reportRoutes'));
+
 
 app.get('/', (req, res) => {
   res.send('TransitOps API is running...');
