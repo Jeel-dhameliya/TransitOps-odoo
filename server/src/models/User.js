@@ -13,9 +13,9 @@ const userSchema = new mongoose.Schema({
   },
   role: { 
     type: String, 
-    enum: ['Fleet Manager', 'Dispatcher', 'Safety Officer', 'Financial Analyst'],
-    default: 'Dispatcher' 
-  } //[cite: 1]
+    enum: ['Fleet Manager', 'Driver', 'Safety Officer', 'Financial Analyst'],
+    default: 'Driver' 
+  }
 }, { timestamps: true });
 
 userSchema.pre('save' , async function(){

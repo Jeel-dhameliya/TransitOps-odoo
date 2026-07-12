@@ -4,7 +4,8 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
-
+const vehicleRoutes = require('./routes/vehicleRoutes');
+const driverRoutes = require('./routes/driverRoutes');
 dotenv.config();
 connectDB();
 
@@ -21,6 +22,8 @@ app.use(cookieParser());
 
 // Mount the routes
 app.use('/api/auth', authRoutes);
+app.use('/api/drivers', driverRoutes);
+app.use('/api/vehicles', vehicleRoutes);
 
 app.get('/', (req, res) => {
   res.send('TransitOps API is running...');
