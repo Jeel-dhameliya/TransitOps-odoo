@@ -5,7 +5,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const mongoSanitize = require('express-mongo-sanitize');
+// mongoSanitize removed due to Express 5 compatibility
 
 const connectDB = require('./config/db');
 const AppError = require('./utils/AppError');
@@ -53,9 +53,7 @@ app.use(express.urlencoded({ extended: true, limit: "20kb" }));
 app.use(cookieParser());
 
 // Data sanitization against NoSQL query injection
-if (process.env.NODE_ENV !== 'test') {
-  app.use(mongoSanitize());
-}
+// Disabled due to Express 5 compatibility issues with express-mongo-sanitize
 
 // Mount the routes
 app.use('/api/auth', authRoutes);
