@@ -31,7 +31,7 @@ const startCronJobs = () => {
         await transporter.sendMail({
           from: process.env.EMAIL_USER,
           to: 'safetyofficer@transitops.com', // In reality, fetch this from your User DB
-          subject: '⚠️ ACTION REQUIRED: Expiring Driver Licenses',
+          subject: ' ACTION REQUIRED: Expiring Driver Licenses',
           text: `The following drivers have licenses expiring in the next 30 days:\n\n${driverNames}`
         });
         
