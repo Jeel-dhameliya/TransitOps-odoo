@@ -4,5 +4,7 @@ export const tripApi = {
   getAll: () => api.get('/trips'),
   create: (data) => api.post('/trips', data),
   getById: (id) => api.get(`/trips/${id}`),
-  updateStatus: (id, status) => api.put(`/trips/${id}/status`, { status }),
+  dispatch: (id) => api.put(`/trips/${id}/dispatch`),
+  complete: (id, finalOdometer) => api.put(`/trips/${id}/complete`, { finalOdometer: finalOdometer !== undefined ? Number(finalOdometer) : undefined }),
+  cancel: (id) => api.put(`/trips/${id}/cancel`),
 };
