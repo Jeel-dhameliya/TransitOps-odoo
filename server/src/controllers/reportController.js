@@ -2,6 +2,7 @@ const Vehicle = require('../models/Vehicle');
 const Trip = require('../models/Trip');
 const Maintenance = require('../models/Maintenance');
 const Fuel = require('../models/Fuel');
+const { Parser } = require('json2csv');
 
 // @desc    Get top-level dashboard KPIs (Utilization, Active counts, etc.)
 // @route   GET /api/reports/dashboard
@@ -138,5 +139,83 @@ const getVehicleFinancials = async (req, res) => {
     res.status(500).json({ message: 'Server Error generating financial reports.' });
   }
 };
+// @desc    Export Financial Analytics as CSV
+// @route   GET /api/reports/financials/export
+// @access  Private (Financial Analyst, Fleet Manager)
+const exportFinancialsCSV = async (req, res) => {
+  try {
+    // Run the exact same aggregation pipeline from getVehicleFinancials
+    const analytics = await Vehicle.aggregate([
+      { $lookup: { from: 'fuels', localField: '_id', foreignField: 'vehicle', as: 'fuelLogs' } },
+      { $lookup: { from: 'maintenances', localField: '_id', foreignField: 'vehicle', as: 'maintenanceLogs' } },
+      { $lookup: { from: 'trips', localField: '_id', foreignField: 'vehicle', as: 'tripLogs' } },
+      {
+        $addFields: {
+          totalFuelCost: { $sum: '$fuelLogs.cost' },
+          totalFuelLiters: { $sum: '$fuelLogs.liters' },
+          totalMaintenanceCost: { $sum: '$maintenanceLogs.cost' },
+          completedTrips: {
+            $filter: {
+              input: '$tripLogs',
+              as: 'trip',
+              cond: { $eq: ['$$trip.status', 'Completed'] }
+            }
+          }
+        }
+      },
+      {
+        $addFields: {
+          operationalCost: { $add: ['$totalFuelCost', '$totalMaintenanceCost'] }, //[cite: 1]
+          totalDistance: { $sum: '$completedTrips.plannedDistance' },
+          totalRevenue: { $multiply: [{ $sum: '$completedTrips.plannedDistance' }, 2] } 
+        }
+      },
+      {
+        $project: {
+          registrationNumber: 1,
+          name: 1,
+          acquisitionCost: 1,
+          totalDistance: 1,
+          operationalCost: 1,
+          fuelEfficiency: {
+            $cond: [{ $gt: ['$totalFuelLiters', 0] }, { $divide: ['$totalDistance', '$totalFuelLiters'] }, 0]
+          },
+          roi: {
+            $cond: [
+              { $gt: ['$acquisitionCost', 0] },
+              { $divide: [{ $subtract: ['$totalRevenue', '$operationalCost'] }, '$acquisitionCost'] },
+              0
+            ]
+          }
+        }
+      }
+    ]);
 
-module.exports = { getDashboardKPIs, getVehicleFinancials };
+    // Define the column headers for the CSV
+    const fields = [
+      { label: 'Registration Number', value: 'registrationNumber' },
+      { label: 'Vehicle Name', value: 'name' },
+      { label: 'Acquisition Cost ($)', value: 'acquisitionCost' },
+      { label: 'Total Distance (km)', value: 'totalDistance' },
+      { label: 'Operational Cost ($)', value: 'operationalCost' },
+      { label: 'Fuel Efficiency (km/L)', value: 'fuelEfficiency' },
+      { label: 'ROI', value: 'roi' }
+    ];
+
+    // Parse the JSON data to CSV format
+    const json2csvParser = new Parser({ fields });
+    const csv = json2csvParser.parse(analytics);
+
+    // Set headers so the browser downloads it as a file[cite: 1]
+    res.header('Content-Type', 'text/csv');
+    res.attachment('transitops_financial_report.csv');
+    return res.send(csv);
+
+  } catch (error) {
+    console.error('CSV Export Error:', error);
+    res.status(500).json({ message: 'Server Error generating CSV.' });
+  }
+};
+
+// Don't forget to export the new function at the bottom!
+module.exports = { getDashboardKPIs, getVehicleFinancials, exportFinancialsCSV };
