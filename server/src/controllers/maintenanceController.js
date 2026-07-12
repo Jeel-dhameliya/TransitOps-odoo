@@ -66,4 +66,17 @@ const closeMaintenance = async (req, res) => {
   }
 };
 
-module.exports = { createMaintenance, closeMaintenance };
+// @desc    Get all maintenance records
+// @route   GET /api/maintenance
+// @access  Private
+const getAllMaintenance = async (req, res) => {
+  try {
+    const records = await Maintenance.find().populate('vehicle');
+    res.json(records);
+  } catch (error) {
+    console.error('Get Maintenance Error:', error);
+    res.status(500).json({ message: 'Server Error fetching maintenance records.' });
+  }
+};
+
+module.exports = { getAllMaintenance, createMaintenance, closeMaintenance };

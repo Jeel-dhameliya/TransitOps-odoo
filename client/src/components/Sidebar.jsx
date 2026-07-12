@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Truck, Users, Map, X, LayoutDashboard } from 'lucide-react';
+import { Truck, Users, Map, X, LayoutDashboard, Wrench, Fuel } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -11,6 +11,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { name: 'Vehicles', path: '/vehicles', icon: Truck, roles: ['Fleet Manager', 'Driver', 'Safety Officer'] },
     { name: 'Drivers', path: '/drivers', icon: Users, roles: ['Fleet Manager', 'Driver', 'Safety Officer'] },
     { name: 'Trips', path: '/trips', icon: Map, roles: ['Fleet Manager', 'Driver'] },
+    { name: 'Maintenance', path: '/maintenance', icon: Wrench, roles: ['Fleet Manager', 'Financial Analyst'] },
+    { name: 'Fuel & Expenses', path: '/fuel', icon: Fuel, roles: ['Fleet Manager', 'Driver', 'Financial Analyst'] },
   ];
 
   // Filter items based on role. (In the future, add other roles' pages)

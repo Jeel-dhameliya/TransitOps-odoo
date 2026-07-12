@@ -10,6 +10,8 @@ import Dashboard from './pages/Dashboard';
 import Vehicle from './pages/Vehicle';
 import Driver from './pages/Driver';
 import Trip from './pages/Trip';
+import Maintenance from './pages/Maintenance';
+import Fuel from './pages/Fuel';
 
 function App() {
   return (
@@ -26,6 +28,8 @@ function App() {
               <Route path="/vehicles" element={<Vehicle />} />
               <Route path="/drivers" element={<Driver />} />
               <Route path="/trips" element={<Trip />} />
+              <Route path="/maintenance" element={<Maintenance />} />
+              <Route path="/fuel" element={<Fuel />} />
             </Route>
           </Route>
 
