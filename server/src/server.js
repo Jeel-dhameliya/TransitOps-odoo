@@ -15,7 +15,7 @@ const authRoutes = require('./routes/authRoutes');
 const vehicleRoutes = require('./routes/vehicleRoutes');
 const driverRoutes = require('./routes/driverRoutes');
 const tripRoutes = require('./routes/tripRoutes');
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 connectDB();
 
 const app = express();
